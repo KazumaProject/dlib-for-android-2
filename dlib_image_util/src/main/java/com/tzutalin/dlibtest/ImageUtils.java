@@ -21,7 +21,7 @@ public class ImageUtils  {
         int mScreenRotation;
 
         if (orientation == 0 ){
-            mScreenRotation = -90;
+            mScreenRotation = 90;
         } else {
             mScreenRotation = 0;
         }
@@ -37,13 +37,13 @@ public class ImageUtils  {
 
     public Bitmap imageSideInversion(Bitmap src){
         Matrix sideInversion = new Matrix();
-        sideInversion.setScale(-1, 1,(src.getWidth())/2f,(src.getHeight())/2f);
+        sideInversion.setScale(1, -1,(src.getWidth())/2f,(src.getHeight())/2f);
         return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), sideInversion, false);
     }
 
     public Bitmap imageSideInversion2(Bitmap src){
         Matrix sideInversion = new Matrix();
-        sideInversion.setScale(-1, -1,(src.getWidth())/2f,(src.getHeight())/2f);
+        sideInversion.setScale(1, 1,(src.getWidth())/2f,(src.getHeight())/2f);
         return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), sideInversion, false);
     }
 
@@ -60,7 +60,12 @@ public class ImageUtils  {
         mPreviewHeight = image.getHeight();
         mRGBBytes = new int[mPreviewWdith * mPreviewHeight];
         mRGBframeBitmap = Bitmap.createBitmap(mPreviewWdith, mPreviewHeight, Bitmap.Config.ARGB_8888);
-        Bitmap mCroppedBitmap = Bitmap.createBitmap(mPreviewWdith, mPreviewHeight , Bitmap.Config.ARGB_8888);
+        Bitmap mCroppedBitmap;
+        if (!cameraSelector){
+            mCroppedBitmap =  Bitmap.createBitmap(mPreviewHeight, mPreviewWdith , Bitmap.Config.ARGB_8888);
+        }else {
+            mCroppedBitmap =  Bitmap.createBitmap(mPreviewWdith, mPreviewHeight , Bitmap.Config.ARGB_8888);
+        }
         mYUVBytes = new byte[planes.length][];
         for (int i = 0; i < planes.length; ++i) {
             mYUVBytes[i] = new byte[planes[i].getBuffer().capacity()];
@@ -86,11 +91,13 @@ public class ImageUtils  {
 
         mRGBframeBitmap.setPixels(mRGBBytes, 0, mPreviewWdith, 0, 0, mPreviewWdith, mPreviewHeight);
         drawResizedBitmap(mRGBframeBitmap,mCroppedBitmap, orientaion);
-        Bitmap mResizedBitmap = Bitmap.createScaledBitmap(mCroppedBitmap, (int) (mPreviewWdith), (int) (mPreviewHeight), true);
+        Bitmap mResizedBitmap;
         if (!cameraSelector){
+             mResizedBitmap= Bitmap.createScaledBitmap(mCroppedBitmap, (int) (mPreviewHeight), (int) (mPreviewWdith), true);
             return imageSideInversion(mResizedBitmap);
         }else {
-            return imageSideInversion2(mResizedBitmap);
+            mResizedBitmap = Bitmap.createScaledBitmap(mCroppedBitmap, (int) (mPreviewWdith), (int) (mPreviewHeight), true);
+            return mResizedBitmap;
         }
     }
 

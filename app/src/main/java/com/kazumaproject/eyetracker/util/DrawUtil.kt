@@ -122,7 +122,7 @@ class DrawUtil (private val surfaceHolder: SurfaceHolder) {
         val resizeRatioX = if (!cameraSelectorState) 3.25f else 2.25f
         val resizeRatioY = if (!cameraSelectorState) 3.25f else 2.50f
         val offsetX = if (!cameraSelectorState) -500 else -175
-        val offsetY = if (!cameraSelectorState) 250 else 425
+        val offsetY = if (!cameraSelectorState) 250 else 375
 
         for (detectedObject in detectedObjectList){
             var i = 1
