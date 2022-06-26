@@ -56,7 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="128dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:shape_roundRect_bottomLeftRadius="8dp"
         app:shape_roundRect_bottomRightRadius="8dp"
         app:shape_roundRect_topLeftRadius="8dp"
