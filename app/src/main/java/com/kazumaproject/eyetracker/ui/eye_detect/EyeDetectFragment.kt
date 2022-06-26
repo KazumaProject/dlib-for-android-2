@@ -201,10 +201,10 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
                                             overlaySurfaceView.drawLandMarks(list,viewModel.whichCameraUsed.value?:false,colorMode, orientation)
                                         }
                                         1 ->{
-                                            overlaySurfaceView.drawEyes(list,viewModel.whichCameraUsed.value?:false, colorMode)
+                                            overlaySurfaceView.drawEyes(list,viewModel.whichCameraUsed.value?:false, colorMode,orientation)
                                         }
                                         2 ->{
-                                            overlaySurfaceView.drawAroundEye(list,viewModel.whichCameraUsed.value?:false, colorMode)
+                                            overlaySurfaceView.drawAroundEye(list,viewModel.whichCameraUsed.value?:false, colorMode,orientation)
                                         }
                                     }
                                 }

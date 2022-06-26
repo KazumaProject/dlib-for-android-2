@@ -35,16 +35,16 @@ class OverlaySurfaceView (surfaceView: SurfaceView) :
     }
 
 
-    fun drawEyes(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int){
-        DrawUtil(surfaceHolder).drawEyes(detectedObjectList, cameraSelectorState, colorMode)
+    fun drawEyes(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int,orientation: Int){
+        DrawUtil(surfaceHolder).drawEyes(detectedObjectList, cameraSelectorState, colorMode,orientation)
     }
 
     fun drawLandMarks(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int, orientation: Int){
         DrawUtil(surfaceHolder).drawLandmarks(detectedObjectList, cameraSelectorState, colorMode, orientation)
     }
 
-    fun drawAroundEye(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int){
-        DrawUtil(surfaceHolder).drawRectAroundEyes(detectedObjectList, cameraSelectorState, colorMode)
+    fun drawAroundEye(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int,orientation: Int){
+        DrawUtil(surfaceHolder).drawRectAroundEyes(detectedObjectList, cameraSelectorState, colorMode,orientation)
     }
 
     fun getSensorValues(x: Float, y: Float, z: Float){
