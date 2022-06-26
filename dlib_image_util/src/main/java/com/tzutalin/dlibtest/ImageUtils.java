@@ -16,12 +16,16 @@ import java.nio.ByteBuffer;
 
 public class ImageUtils  {
 
-    private void drawResizedBitmap(final Bitmap src, final Bitmap dst, final int orientation) {
+    private void drawResizedBitmap(final Bitmap src, final Bitmap dst, final int rotation) {
 
         int mScreenRotation;
 
-        if (orientation == 0 ){
+        if (rotation == 270 ){
+            mScreenRotation = -270;
+        } else if (rotation == 90){
             mScreenRotation = 90;
+        } else if (rotation == 180){
+            mScreenRotation = 0;
         } else {
             mScreenRotation = 0;
         }
@@ -43,15 +47,21 @@ public class ImageUtils  {
 
     public Bitmap imageSideInversion2(Bitmap src){
         Matrix sideInversion = new Matrix();
-        sideInversion.setScale(1, 1,(src.getWidth())/2f,(src.getHeight())/2f);
+        sideInversion.setScale(-1, -1,(src.getWidth())/2f,(src.getHeight())/2f);
         return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), sideInversion, false);
     }
 
-    public Bitmap get888BitMap(Image image, int orientaion, boolean cameraSelector){
+    public Bitmap imageSideInversion3(Bitmap src){
+        Matrix sideInversion = new Matrix();
+        sideInversion.setScale(-1, 1,(src.getWidth())/2f,(src.getHeight())/2f);
+        return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), sideInversion, false);
+    }
+
+    public Bitmap get888BitMap(Image image, int rotation, boolean cameraSelector){
         int mPreviewWdith;
         int mPreviewHeight;
         Log.d(TAG,"width: " + image.getWidth() + "\nheight: "+ image.getHeight());
-        Log.d(TAG,"orientation degree: " + orientaion);
+        Log.d(TAG,"orientation degree: " + rotation);
         int[] mRGBBytes;
         final Image.Plane[] planes = image.getPlanes();
         Bitmap mRGBframeBitmap;
@@ -61,11 +71,7 @@ public class ImageUtils  {
         mRGBBytes = new int[mPreviewWdith * mPreviewHeight];
         mRGBframeBitmap = Bitmap.createBitmap(mPreviewWdith, mPreviewHeight, Bitmap.Config.ARGB_8888);
         Bitmap mCroppedBitmap;
-        if (!cameraSelector){
-            mCroppedBitmap =  Bitmap.createBitmap(mPreviewHeight, mPreviewWdith , Bitmap.Config.ARGB_8888);
-        }else {
-            mCroppedBitmap =  Bitmap.createBitmap(mPreviewWdith, mPreviewHeight , Bitmap.Config.ARGB_8888);
-        }
+        mCroppedBitmap =  Bitmap.createBitmap(mPreviewWdith, mPreviewHeight , Bitmap.Config.ARGB_8888);
         mYUVBytes = new byte[planes.length][];
         for (int i = 0; i < planes.length; ++i) {
             mYUVBytes[i] = new byte[planes[i].getBuffer().capacity()];
@@ -90,15 +96,38 @@ public class ImageUtils  {
                 false);
 
         mRGBframeBitmap.setPixels(mRGBBytes, 0, mPreviewWdith, 0, 0, mPreviewWdith, mPreviewHeight);
-        drawResizedBitmap(mRGBframeBitmap,mCroppedBitmap, orientaion);
+        drawResizedBitmap(mRGBframeBitmap,mCroppedBitmap, rotation);
         Bitmap mResizedBitmap;
-        if (!cameraSelector){
-             mResizedBitmap= Bitmap.createScaledBitmap(mCroppedBitmap, (int) (mPreviewHeight), (int) (mPreviewWdith), true);
+
+        /**
+         *   Tested Only Pixel 3a
+         *   1st. Portrait and front camera
+         *   2nd. Portrait and back camera
+         *   3rd. Landscape and front camera
+         *   4th. Landscape and back camera
+         *   5th. Landscape and front camera
+         *   else. Landscape and back camera
+         */
+        if (!cameraSelector && rotation == 270){
+            mResizedBitmap= Bitmap.createScaledBitmap(mCroppedBitmap, mPreviewWdith, mPreviewHeight, true);
             return imageSideInversion(mResizedBitmap);
-        }else {
-            mResizedBitmap = Bitmap.createScaledBitmap(mCroppedBitmap, (int) (mPreviewWdith), (int) (mPreviewHeight), true);
+        } else if (cameraSelector && rotation == 90){
+            mResizedBitmap = Bitmap.createScaledBitmap(mCroppedBitmap, mPreviewWdith, mPreviewHeight, true);
+            return mResizedBitmap;
+        } else if (!cameraSelector && rotation == 180){
+            mResizedBitmap= Bitmap.createScaledBitmap(mCroppedBitmap, mPreviewWdith, mPreviewHeight, true);
+            return imageSideInversion(mResizedBitmap);
+        } else if (cameraSelector && rotation == 180){
+            mResizedBitmap= Bitmap.createScaledBitmap(mCroppedBitmap, mPreviewWdith, mPreviewHeight, true);
+            return imageSideInversion2(mResizedBitmap);
+        } else if (!cameraSelector && rotation == 0){
+            mResizedBitmap = Bitmap.createScaledBitmap(mCroppedBitmap, mPreviewWdith, mPreviewHeight, true);
+            return imageSideInversion3(mResizedBitmap);
+        } else {
+            mResizedBitmap = Bitmap.createScaledBitmap(mCroppedBitmap, mPreviewWdith, mPreviewHeight, true);
             return mResizedBitmap;
         }
+
     }
 
 

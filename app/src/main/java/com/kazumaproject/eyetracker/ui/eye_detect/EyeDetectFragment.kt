@@ -145,9 +145,11 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
-        cameraExecutor.shutdown()
-        faceDet.release()
+        if (!requireActivity().isChangingConfigurations){
+            _binding = null
+            cameraExecutor.shutdown()
+            faceDet.release()
+        }
     }
 
     private fun startCamera(){
@@ -180,7 +182,7 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
             Timber.d("f w: $width   $height")
 
             val imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetRotation(Surface.ROTATION_90)
+                .setTargetRotation(binding.cameraView.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setTargetAspectRatio(aspectRatio)
                 .build()
@@ -196,7 +198,7 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
                                 viewModel.colorMode.value?.let { colorMode->
                                     when(mode){
                                         0 ->{
-                                            overlaySurfaceView.drawLandMarks(list,viewModel.whichCameraUsed.value?:false,colorMode)
+                                            overlaySurfaceView.drawLandMarks(list,viewModel.whichCameraUsed.value?:false,colorMode, orientation)
                                         }
                                         1 ->{
                                             overlaySurfaceView.drawEyes(list,viewModel.whichCameraUsed.value?:false, colorMode)

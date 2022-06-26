@@ -10,7 +10,8 @@ class DrawUtil (private val surfaceHolder: SurfaceHolder) {
     fun drawLandmarks(
         detectedObjectList: List<DetectionObject>,
         cameraSelectorState: Boolean,
-        colorMode: Int
+        colorMode: Int,
+        orientation: Int
     ){
         val canvas: Canvas? = surfaceHolder.lockCanvas()
         //Reset
@@ -26,19 +27,42 @@ class DrawUtil (private val surfaceHolder: SurfaceHolder) {
             style = Paint.Style.STROKE
         }
 
-        val resizeRatioX = if (!cameraSelectorState) 3.25f else 2.25f
-        val resizeRatioY = if (!cameraSelectorState) 3.25f else 2.50f
-        val offsetX = if (!cameraSelectorState) -500 else -175
-        val offsetY = if (!cameraSelectorState) 250 else 425
+        /**
+         * Portrait
+         */
+        if (orientation == 1){
+            val resizeRatioXP = if (!cameraSelectorState) 3.25f else 2.25f
+            val resizeRatioYP = if (!cameraSelectorState) 3.25f else 2.50f
+            val offsetXP = if (!cameraSelectorState) -500 else -175
+            val offsetYP = if (!cameraSelectorState) 250 else 425
 
-        for (detectedObject in detectedObjectList){
+            for (detectedObject in detectedObjectList){
 
-            for (point in detectedObject.landMarks){
-                val pointX = (point.x * resizeRatioX + offsetX)
-                val pointY = (point.y * resizeRatioY + offsetY)
-                canvas?.drawCircle(pointX, pointY, 4f, paint)
+                for (point in detectedObject.landMarks){
+                    val pointX = (point.x * resizeRatioXP + offsetXP)
+                    val pointY = (point.y * resizeRatioYP + offsetYP)
+                    canvas?.drawCircle(pointX, pointY, 4f, paint)
+                }
             }
         }
+
+        /**
+         * Landscape
+         */
+        if (orientation == 0){
+            val resizeRatioXL = if (!cameraSelectorState) 1.65f else 1.25f
+            val resizeRatioYL = if (!cameraSelectorState) 1.58f else 1.20f
+            val offsetXL = if (!cameraSelectorState) 0 else 275
+            val offsetYL = if (!cameraSelectorState) -50 else 75
+            for (detectedObject in detectedObjectList){
+                for (point in detectedObject.landMarks){
+                    val pointX = (point.x * resizeRatioXL + offsetXL)
+                    val pointY = (point.y * resizeRatioYL + offsetYL)
+                    canvas?.drawCircle(pointX, pointY, 4f, paint)
+                }
+            }
+        }
+
         surfaceHolder.unlockCanvasAndPost(canvas ?: return)
     }
 

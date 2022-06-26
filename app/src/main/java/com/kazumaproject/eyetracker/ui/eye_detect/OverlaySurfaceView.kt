@@ -5,8 +5,6 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.kazumaproject.eyetracker.detection.DetectionObject
 import com.kazumaproject.eyetracker.util.DrawUtil
-import timber.log.Timber
-import kotlin.math.abs
 
 class OverlaySurfaceView (surfaceView: SurfaceView) :
     SurfaceView(surfaceView.context), SurfaceHolder.Callback{
@@ -41,8 +39,8 @@ class OverlaySurfaceView (surfaceView: SurfaceView) :
         DrawUtil(surfaceHolder).drawEyes(detectedObjectList, cameraSelectorState, colorMode)
     }
 
-    fun drawLandMarks(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int){
-        DrawUtil(surfaceHolder).drawLandmarks(detectedObjectList, cameraSelectorState, colorMode)
+    fun drawLandMarks(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int, orientation: Int){
+        DrawUtil(surfaceHolder).drawLandmarks(detectedObjectList, cameraSelectorState, colorMode, orientation)
     }
 
     fun drawAroundEye(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int){
