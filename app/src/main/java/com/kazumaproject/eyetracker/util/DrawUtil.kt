@@ -7,6 +7,13 @@ import com.kazumaproject.eyetracker.detection.DetectionObject
 class DrawUtil (private val surfaceHolder: SurfaceHolder) {
     private val paint = Paint()
 
+    fun clearView(){
+        val canvas: Canvas? = surfaceHolder.lockCanvas()
+        //Reset
+        canvas?.drawColor(0, PorterDuff.Mode.CLEAR)
+        surfaceHolder.unlockCanvasAndPost(canvas ?: return)
+    }
+
     fun drawLandmarks(
         detectedObjectList: List<DetectionObject>,
         cameraSelectorState: Boolean,

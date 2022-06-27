@@ -68,15 +68,20 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
         viewModel.updateDrawMode(AppPreferences.currentMode)
         viewModel.updateColorMode(AppPreferences.currentColorMode)
         viewModel.updateIsShowMenu(false)
-        when(AppPreferences.currentMode){
-            0 -> binding.mode.selectButton(binding.btn1)
-            1 -> binding.mode.selectButton(binding.btn2)
-            2 -> binding.mode.selectButton(binding.btn3)
+        viewModel.drawMode.value?.let { mode ->
+            when(mode){
+                0 -> binding.mode.selectButton(binding.btn1)
+                1 -> binding.mode.selectButton(binding.btn2)
+                2 -> binding.mode.selectButton(binding.btn3)
+                else -> binding.mode.selectButton(binding.btn4)
+            }
         }
-        when(AppPreferences.currentColorMode){
-            0 -> binding.mode.selectButton(binding.color1)
-            1 -> binding.mode.selectButton(binding.color2)
-            2 -> binding.mode.selectButton(binding.color3)
+        viewModel.colorMode.value?.let { mode ->
+            when(mode){
+                0 -> binding.colorMode.selectButton(binding.color1)
+                1 -> binding.colorMode.selectButton(binding.color2)
+                else -> binding.colorMode.selectButton(binding.color3)
+            }
         }
         setCameraFrontOrBack()
         overlaySurfaceView = OverlaySurfaceView(binding.resultView)
@@ -99,6 +104,13 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
                 binding.btn3.id ->{
                     viewModel.updateDrawMode(2)
                     AppPreferences.currentMode = 2
+                    startCamera()
+                    binding.settingMenuParent.visibility = View.GONE
+                    viewModel.updateIsShowMenu(false)
+                }
+                binding.btn4.id ->{
+                    viewModel.updateDrawMode(3)
+                    AppPreferences.currentMode = 3
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
@@ -219,6 +231,9 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
                                         }
                                         2 ->{
                                             overlaySurfaceView.drawAroundEye(list,viewModel.whichCameraUsed.value?:false, colorMode,orientation)
+                                        }
+                                        3 ->{
+                                            overlaySurfaceView.clearView()
                                         }
                                     }
                                 }

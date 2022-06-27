@@ -1,11 +1,13 @@
 package com.kazumaproject.eyetracker.ui.eye_detect
 
+import android.annotation.SuppressLint
 import android.graphics.*
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.kazumaproject.eyetracker.detection.DetectionObject
 import com.kazumaproject.eyetracker.util.DrawUtil
 
+@SuppressLint("ViewConstructor")
 class OverlaySurfaceView (surfaceView: SurfaceView) :
     SurfaceView(surfaceView.context), SurfaceHolder.Callback{
 
@@ -14,13 +16,7 @@ class OverlaySurfaceView (surfaceView: SurfaceView) :
         surfaceView.setZOrderOnTop(true)
     }
 
-
     private var surfaceHolder = surfaceView.holder
-    //private val paint = Paint()
-
-    private var xValue: Float = 0f
-    private var yValue: Float = 0f
-    private var zValue: Float = 0f
 
     override fun surfaceCreated(p0: SurfaceHolder) {
         surfaceHolder.setFormat(PixelFormat.TRANSPARENT)
@@ -34,6 +30,9 @@ class OverlaySurfaceView (surfaceView: SurfaceView) :
 
     }
 
+    fun clearView(){
+        DrawUtil(surfaceHolder).clearView()
+    }
 
     fun drawEyes(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int,orientation: Int){
         DrawUtil(surfaceHolder).drawEyes(detectedObjectList, cameraSelectorState, colorMode,orientation)
@@ -45,12 +44,6 @@ class OverlaySurfaceView (surfaceView: SurfaceView) :
 
     fun drawAroundEye(detectedObjectList: List<DetectionObject>, cameraSelectorState: Boolean, colorMode: Int,orientation: Int){
         DrawUtil(surfaceHolder).drawRectAroundEyes(detectedObjectList, cameraSelectorState, colorMode,orientation)
-    }
-
-    fun getSensorValues(x: Float, y: Float, z: Float){
-        this.xValue = x
-        this.yValue = y
-        this.zValue = z
     }
 
 }
