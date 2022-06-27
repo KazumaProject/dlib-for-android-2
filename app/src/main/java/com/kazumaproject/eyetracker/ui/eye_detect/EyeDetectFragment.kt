@@ -1,7 +1,10 @@
 package com.kazumaproject.eyetracker.ui.eye_detect
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.res.Configuration
-import android.os.Bundle
+import android.os.*
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -14,10 +17,13 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startForegroundService
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import com.kazumaproject.eyetracker.R
 import com.kazumaproject.eyetracker.databinding.FragmentEyeDetectBinding
 import com.kazumaproject.eyetracker.detection.FaceDetection
+import com.kazumaproject.eyetracker.service.PupilDetectService
 import com.kazumaproject.eyetracker.ui.BaseFragment
 import com.kazumaproject.eyetracker.util.AppPreferences
 import com.tzutalin.dlib.Constants
@@ -27,11 +33,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.lang.ref.WeakReference
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
 class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
+
+    companion object{
+        const val MSG_ACTIVITY_TO_SERVICE = 1
+        const val MSG_SERVICE_TO_ACTIVITY = 2
+    }
 
     private var _binding : FragmentEyeDetectBinding? = null
     private val binding get() = _binding!!
@@ -44,11 +56,54 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
 
     private lateinit var overlaySurfaceView: OverlaySurfaceView
 
+    private var bound = false
+    private var mActivityMessenger: Messenger? = null
+    private var mServiceMessenger: Messenger? = null
+    private var mActivityHandler: ActivityHandler? = null
+
+
+    private val mConnection = object: ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            mServiceMessenger = Messenger(binder)
+            try {
+                val msg = Message.obtain(null, MSG_ACTIVITY_TO_SERVICE, 0, 0)
+                msg.replyTo = mActivityMessenger
+                mServiceMessenger!!.send(msg)
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            }
+            bound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mServiceMessenger = null
+            bound = false
+        }
+    }
+
+    internal class ActivityHandler(
+        fragment: FragmentActivity
+    ) : Handler() {
+        //define weak reference to activity
+        private val mActivity = WeakReference(fragment)
+
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                MSG_SERVICE_TO_ACTIVITY ->{
+                    //something
+                }
+                else -> super.handleMessage(msg)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
         faceDet = FaceDet(Constants.getFaceShapeModelPath())
         AppPreferences.init(requireContext())
+        mActivityHandler = ActivityHandler(requireActivity())
+        mActivityMessenger = Messenger(mActivityHandler)
     }
 
     override fun onCreateView(
@@ -169,6 +224,14 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
 
     }
 
+    override fun onStop() {
+        super.onStop()
+        if(bound){
+            requireActivity().unbindService(mConnection)
+            bound = false
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         if (!requireActivity().isChangingConfigurations){
@@ -234,6 +297,13 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
                                         }
                                         3 ->{
                                             overlaySurfaceView.clearView()
+                                            Intent(requireContext(),PupilDetectService::class.java).also { service ->
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                    requireActivity().startForegroundService(service)
+                                                    return@FaceDetection
+                                                }
+                                                    requireActivity().startService(service)
+                                            }
                                         }
                                     }
                                 }
