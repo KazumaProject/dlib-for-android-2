@@ -3,7 +3,10 @@ package com.kazumaproject.eyetracker.ui.eye_detect
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.camera.camera2.internal.compat.workaround.TargetAspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -16,6 +19,7 @@ import com.kazumaproject.eyetracker.R
 import com.kazumaproject.eyetracker.databinding.FragmentEyeDetectBinding
 import com.kazumaproject.eyetracker.detection.FaceDetection
 import com.kazumaproject.eyetracker.ui.BaseFragment
+import com.kazumaproject.eyetracker.util.AppPreferences
 import com.tzutalin.dlib.Constants
 import com.tzutalin.dlib.FaceDet
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +48,7 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
         super.onCreate(savedInstanceState)
         cameraExecutor = Executors.newSingleThreadExecutor()
         faceDet = FaceDet(Constants.getFaceShapeModelPath())
+        AppPreferences.init(requireContext())
     }
 
     override fun onCreateView(
@@ -60,34 +65,40 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
         viewModel.drawMode.observe(viewLifecycleOwner){}
         viewModel.colorMode.observe(viewLifecycleOwner){}
         viewModel.isShowMenu.observe(viewLifecycleOwner){}
-        viewModel.updateDrawMode(0)
-        viewModel.updateColorMode(0)
+        viewModel.updateDrawMode(AppPreferences.currentMode)
+        viewModel.updateColorMode(AppPreferences.currentColorMode)
         viewModel.updateIsShowMenu(false)
+        when(AppPreferences.currentMode){
+            0 -> binding.mode.selectButton(binding.btn1)
+            1 -> binding.mode.selectButton(binding.btn2)
+            2 -> binding.mode.selectButton(binding.btn3)
+        }
+        when(AppPreferences.currentColorMode){
+            0 -> binding.mode.selectButton(binding.color1)
+            1 -> binding.mode.selectButton(binding.color2)
+            2 -> binding.mode.selectButton(binding.color3)
+        }
         setCameraFrontOrBack()
         overlaySurfaceView = OverlaySurfaceView(binding.resultView)
-        binding.mode.selectButton(binding.btn1)
-        binding.colorMode.selectButton(binding.color1)
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(10)
-            binding.settingMenuParent.visibility = View.GONE
-            viewModel.updateIsShowMenu(false)
-        }
         binding.mode.setOnSelectListener {
             when(it.id){
                 binding.btn1.id ->{
                     viewModel.updateDrawMode(0)
+                    AppPreferences.currentMode = 0
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
                 }
                 binding.btn2.id ->{
                     viewModel.updateDrawMode(1)
+                    AppPreferences.currentMode = 1
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
                 }
                 binding.btn3.id ->{
                     viewModel.updateDrawMode(2)
+                    AppPreferences.currentMode = 2
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
@@ -98,18 +109,21 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
             when(it.id){
                 binding.color1.id ->{
                     viewModel.updateColorMode(0)
+                    AppPreferences.currentColorMode = 0
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
                 }
                 binding.color2.id ->{
                     viewModel.updateColorMode(1)
+                    AppPreferences.currentColorMode = 1
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
                 }
                 binding.color3.id ->{
                     viewModel.updateColorMode(2)
+                    AppPreferences.currentColorMode = 2
                     startCamera()
                     binding.settingMenuParent.visibility = View.GONE
                     viewModel.updateIsShowMenu(false)
@@ -160,7 +174,7 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             //Front Camera by default
-            val cameraSelector = if (viewModel.whichCameraUsed.value == true) CameraSelector.DEFAULT_BACK_CAMERA else CameraSelector.DEFAULT_FRONT_CAMERA
+            val cameraSelector = if (AppPreferences.currentCameraState) CameraSelector.DEFAULT_BACK_CAMERA else CameraSelector.DEFAULT_FRONT_CAMERA
 
             val orientation = if (Configuration.ORIENTATION_PORTRAIT == resources.configuration.orientation) 1 else 0
 
@@ -228,14 +242,8 @@ class EyeDetectFragment : BaseFragment(R.layout.fragment_eye_detect) {
 
     private fun setCameraFrontOrBack(){
         binding.toggleFrontBackCameraImg.setOnClickListener {
-            viewModel.whichCameraUsed.value?.let { camera_state ->
-                if (camera_state){
-                    viewModel.updateWhichCameraUsed(false)
-                } else {
-                    viewModel.updateWhichCameraUsed(true)
-                }
-                startCamera()
-            }
+            AppPreferences.currentCameraState = !AppPreferences.currentCameraState
+            startCamera()
         }
     }
 
