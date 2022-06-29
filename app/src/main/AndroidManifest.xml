@@ -10,8 +10,6 @@
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
     <application
         android:name=".Application"
         android:allowBackup="true"
@@ -24,12 +22,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EyeTracker"
         tools:targetApi="31">
-        <service
-            android:name=".service.PupilDetectService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="camera"
-            />
 
         <activity
             android:name=".MainActivity"

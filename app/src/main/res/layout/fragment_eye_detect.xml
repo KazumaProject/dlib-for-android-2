@@ -108,12 +108,6 @@
                     android:layout_height="38dp"
                     app:toggle_text="Eye Rect" />
 
-                <nl.bryanderidder.themedtogglebuttongroup.ThemedButton
-                    android:id="@+id/btn4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    app:toggle_text="Eye Track"/>
-
             </nl.bryanderidder.themedtogglebuttongroup.ThemedToggleButtonGroup>
 
             <nl.bryanderidder.themedtogglebuttongroup.ThemedToggleButtonGroup
